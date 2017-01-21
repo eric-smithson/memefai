@@ -1,5 +1,7 @@
 from clarifai_handler import *
 from reddit_handler import *
+from ocr_handler import *
+import json
 
 # this is where we do all the main action, we will make call to the other files from this script
 
@@ -24,10 +26,10 @@ for image_url in image_url_list:
     # format the message template to include the tags
     message = MESSAGE_TEMPLATE.replace("$__TAGS__$", (', ').join(image_tags))
     # TODO: the code below is placeholder, needs to be updated with actual OCR calls
-    has_text = True
-    if(has_text):
-        message = message.replace("$__TEXT_BLURB__$", "\n\nTranscribed text in meme: \n\n    $__TEXT__$.")
-        message = message.replace("$__TEXT__$", "I LIKE DANK MEMES")
+    has_text = False
+    if(does_image_have_text(image_url)):
+        message = message.replace("$__TEXT_BLURB__$", "\n\nDetected text in meme: \n\n    $__TEXT__$.")
+        message = message.replace("$__TEXT__$", get_text_in_image(image_url))
     else:
         message = message.replace("$__TEXT_BLURB__$", "")
     print message
