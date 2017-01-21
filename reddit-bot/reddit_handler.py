@@ -8,12 +8,12 @@ def get_image_post_url():
     submissions_list = []
     for submission in subreddit.hot(limit=5):
         if submission.score > 500:
-            print submission.url
             url = submission.url
             if url[7:12] == 'imgur':
                 url = 'http://i.' + url[7:] + '.jpg'
+            print url
             submissions_list.append(url)
     return submissions_list
 
-def make_comment():
+def make_comment(body):
     pass
