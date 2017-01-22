@@ -59,5 +59,7 @@ while(True):
         # sends comment to reddit to be posted
         make_comment(message, submission)
 
-    time.sleep(60)
+        break
+
+    time.sleep(601)
 
