@@ -9,18 +9,26 @@ import json
 # fill out with our message template, will have to be formatted in reddit markup
 MESSAGE_TEMPLATE = '''MemefaiBot has detected these tags:
 
-    $__TAGS__$$__TEXT_BLURB__$
+    $__TAGS__$$__TEXT_BLURB__$$__EMOJI__$
 
 ^(Like this bot? Contribute at github.com/eric-smithson/memefai)
 '''
 
+
+def title_stripper(title):
+    if(title[0:2].lower() == "me" and title[-3:].lower() == "irl"):
+        return title[2]
+    else:
+        return ""
+
+
 # get image url from reddit
-image_url_list = get_image_post_url()
+image_url_dict = get_image_post_url()
 
 # todo: find a way to get the titles, this is actually important because the titles differ with the spacing between "me" and "irl", usually with emoji.
 
 # send image to clarifai
-for image_url in image_url_list:
+for image_url in image_url_dict:
 
     if check_if_url_in_db(image_url): # returns true if the url is already in our db
         continue
@@ -30,7 +38,7 @@ for image_url in image_url_list:
     # format the message template to include the tags
     message = MESSAGE_TEMPLATE.replace("$__TAGS__$", (', ').join(image_tags))
 
-    # TODO: build out OCR calls
+    # TODO: build out OCR handler
     text_in_image = ""
     if(does_image_have_text(image_url)):
         message = message.replace("$__TEXT_BLURB__$", "\n\nDetected text in meme: \n\n    $__TEXT__$.")
@@ -39,10 +47,19 @@ for image_url in image_url_list:
     else:
         message = message.replace("$__TEXT_BLURB__$", "")
 
+    # build emoji message
+    emoji_char = title_stripper(image_url_dict[image_url])
+
+    if emoji_char == "" or emoji_char == "_" or emoji_char == " ":
+        message = message.replace("$__EMOJI__$", "")
+    else:
+        message = message.replace("$__EMOJI__$", "\n\nTitle Emoji: " + emoji_char)
+
     print message
 
     # sends info to be stored in the database
-    put_in_db(image_url, image_tags, text_in_image)
+    put_in_db(image_url, image_tags, text_in_image, image_url_dict[image_url])
 
     # sends comment to reddit to be posted
-    make_comment(message)
+    make_comment(message, image_url)
+
