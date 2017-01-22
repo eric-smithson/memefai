@@ -7,11 +7,13 @@ def get_image_post_url():
                          client_secret='yY3dSQTQy2tBWTQVi3eW1vuyf-I', username='MemefaiBot', password=get_password())
     subreddit = reddit.subreddit("me_irl")
     submissions_dict = {}
-    for submission in subreddit.hot(limit=100):
+    for submission in subreddit.hot(limit=150):
         if submission.score > 500:
             url = submission.url
             if url[7:12] == 'imgur':
                 url = 'http://i.' + url[7:] + '.jpg'
+            if url.__contains__("gallery"):
+                continue
             print submission.title
             print url
             submissions_dict[url] = submission
@@ -24,7 +26,7 @@ def make_comment(message, submission):
     reply_template = message
     # url_title = quote_plus(submission.title)
     # reply_text = reply_template.format(url_title)
-    submission.reply(message)
+    return submission.reply(message)
 
 def get_password():
     with open(os.getcwd() + "/data/password.txt", "r") as pass_fp:

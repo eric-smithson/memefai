@@ -23,11 +23,16 @@ while(True):
     image_url_dict = get_image_post_url()
 
     # send image to clarifai
+    # todo: have it pick out the top rated comment instead of picking one at random
     for image_url, submission in image_url_dict.items():
         if check_if_url_in_db(image_url): # returns true if the url is already in our db
+            print "already in database: " + image_url
             continue
 
         image_tags = get_tags(image_url) # this function is defined in clarifai_handler.py
+        print image_tags.__sizeof__()
+        for i in range(5, image_tags.__len__(), 5):
+            image_tags[i] = "\n    " + image_tags[i]
 
         # format the message template to include the tags
         message = MESSAGE_TEMPLATE.replace("$__TAGS__$", (', ').join(image_tags))
@@ -53,13 +58,15 @@ while(True):
 
         print "URL: " + image_url + "\nsubmission.id: " + submission.id
 
+        # try:
+        # sends comment to reddit to be posted
+        reply_id = make_comment(message, submission)
+
         # sends info to be stored in the database
         put_in_db(image_url, image_tags, text_in_image, submission.title, submission.id)
-
-        # sends comment to reddit to be posted
-        make_comment(message, submission)
-
+        # except:
+        #     pass
         break
 
-    time.sleep(601)
+    time.sleep(120)
 

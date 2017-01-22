@@ -17,16 +17,19 @@ def get_tags(image_url):
     # - `CLARIFAI_APP_ID`
     # - `CLARIFAI_APP_SECRET`
 
+    print "sending url to clarifai: " + image_url
+
     from clarifai.rest import ClarifaiApp
+    from clarifai.rest import Image as ClImage
 
     #This is our actual ID and pass
     app = ClarifaiApp("HdVa7-OQfNKRsMiWPXeby4Ik5bMiQ7DtK8i74VsU", "aAdmMpsV6GK9M7G-vMzDo49lWVZ4SkqGm6kApiW0")
 
     # getting the general model
     model = app.models.get("general-v1.3")
-
+    img = ClImage(image_url)
     # predicts with the above model (general)
-    tags_raw = model.predict_by_url(url = image_url)
+    tags_raw = model.predict([img])
 
     tag_dicts = tags_raw['outputs'][0]['data']['concepts']
     tags_clean = [str(d['name']) for d in tag_dicts]
