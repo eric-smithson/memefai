@@ -13,9 +13,14 @@ def get_image_post_url():
                 url = 'http://i.' + url[7:] + '.jpg'
             print submission.title
             print url
-            submissions_dict[url] = submission.title
-
+            submissions_dict[url] = submission
     return submissions_dict
 
-def make_comment(message):
-    pass
+def make_comment(message, url):
+    from urllib import quote_plus
+    reddit = praw.Reddit(user_agent='MemefaiBot for SwampHacks', client_id='2UscbBFgmqdBMA',
+                         client_secret='yY3dSQTQy2tBWTQVi3eW1vuyf-I', username='IAmJimmyNeutron', password='67y890')
+    reply_template = ''
+    url_title = quote_plus(submission.title)
+    reply_text = reply_template.format(url_title)
+    submission.reply(reply_text)

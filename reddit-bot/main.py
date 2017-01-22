@@ -28,8 +28,7 @@ image_url_dict = get_image_post_url()
 # todo: find a way to get the titles, this is actually important because the titles differ with the spacing between "me" and "irl", usually with emoji.
 
 # send image to clarifai
-for image_url in image_url_dict:
-
+for image_url, submission in image_url_dict.items():
     if check_if_url_in_db(image_url): # returns true if the url is already in our db
         continue
 
@@ -48,7 +47,7 @@ for image_url in image_url_dict:
         message = message.replace("$__TEXT_BLURB__$", "")
 
     # build emoji message
-    emoji_char = title_stripper(image_url_dict[image_url])
+    emoji_char = title_stripper(submission.title)
 
     if emoji_char == "" or emoji_char == "_" or emoji_char == " ":
         message = message.replace("$__EMOJI__$", "")
@@ -58,8 +57,8 @@ for image_url in image_url_dict:
     print message
 
     # sends info to be stored in the database
-    put_in_db(image_url, image_tags, text_in_image, image_url_dict[image_url])
+    put_in_db(image_url, image_tags, text_in_image, submission.title)
 
     # sends comment to reddit to be posted
-    make_comment(message, image_url)
+    make_comment(message, submission)
 
