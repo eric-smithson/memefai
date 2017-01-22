@@ -9,10 +9,7 @@ def check_if_url_in_db(url):
         url_dict = json.load(log_fp)
         return url in url_dict
 
-
-log_dir = os.getcwd() + '/data/logs'
-
-def put_in_db(url, tags, text, title):
+def put_in_db(url, tags, text, title, id):
     url_dict = {}
     with open(log_dir + "/database.json", "r") as log_fp:
         url_dict = json.load(log_fp)
@@ -22,14 +19,20 @@ def put_in_db(url, tags, text, title):
     temp_dict["title"] = title
     temp_dict["tags"] = tags
     temp_dict["text"] = text
+    temp_dict["id"] = id
     url_dict[url] = temp_dict
     with open(log_dir + "/database.json", "w") as log_fp:
         json.dump(url_dict, log_fp, indent=1)
     return
 
-dict = {}
+# creates database & directories if they don't exist
 
-dict["hello"] = "greeting"
-dict["swiggity"] = "swoggity"
-
-print dict["hello"]
+dir = os.getcwd()
+log_dir = dir + '/data/logs'
+if not os.path.exists(dir + '/data'):
+    os.makedirs(dir + '/data')
+if not os.path.exists(dir + '/data/logs'):
+    os.makedirs(dir + '/data/logs')
+if not os.path.exists(dir + '/data/logs/database.json'):
+    with open(dir + '/data/logs/database.json', "w") as log_fp:
+        json.dump({}, log_fp)

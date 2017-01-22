@@ -5,7 +5,6 @@ def get_tags(image_url):
     # Acces Token gFISSpi0OPDjRVXc5K4nfUYgJ0S5Bz
     # Pip install the client:
     # pip install clarifai
-    #
 
     # The package will be accessible by importing clarifai:
 
@@ -34,5 +33,3 @@ def get_tags(image_url):
 
     #this would be a list of tags
     return (tags_clean)
-
-

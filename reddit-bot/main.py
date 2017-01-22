@@ -2,16 +2,13 @@ from clarifai_handler import *
 from reddit_handler import *
 from ocr_handler import *
 from json_handler import *
-import json
+import time
 
-# this is where we do all the main action, we will make call to the other files from this script
-
-# fill out with our message template, will have to be formatted in reddit markup
 MESSAGE_TEMPLATE = '''MemefaiBot has detected these tags:
 
     $__TAGS__$$__TEXT_BLURB__$$__EMOJI__$
 
-^(Like this bot? Contribute at github.com/eric-smithson/memefai)
+^(This bot uses) ^[Clarifai](https://www.clarifai.com/), ^(a convolutional neural net API, to automatically find and recognize elements present in even the spiciest memes. Like this bot? Contribute ) ^[here](https://github.com/eric-smithson/memefai)!
 '''
 
 
@@ -21,44 +18,46 @@ def title_stripper(title):
     else:
         return ""
 
+while(True):
+    # get image url from reddit
+    image_url_dict = get_image_post_url()
 
-# get image url from reddit
-image_url_dict = get_image_post_url()
+    # send image to clarifai
+    for image_url, submission in image_url_dict.items():
+        if check_if_url_in_db(image_url): # returns true if the url is already in our db
+            continue
 
-# todo: find a way to get the titles, this is actually important because the titles differ with the spacing between "me" and "irl", usually with emoji.
+        image_tags = get_tags(image_url) # this function is defined in clarifai_handler.py
 
-# send image to clarifai
-for image_url, submission in image_url_dict.items():
-    if check_if_url_in_db(image_url): # returns true if the url is already in our db
-        continue
+        # format the message template to include the tags
+        message = MESSAGE_TEMPLATE.replace("$__TAGS__$", (', ').join(image_tags))
 
-    image_tags = get_tags(image_url) # this function is defined in clarifai_handler.py
+        # TODO: build out OCR handler
+        text_in_image = ""
+        if(does_image_have_text(image_url)):
+            message = message.replace("$__TEXT_BLURB__$", "\n\nDetected text in meme: \n\n    $__TEXT__$.")
+            text_in_image = get_text_in_image(image_url)
+            message = message.replace("$__TEXT__$", text_in_image)
+        else:
+            message = message.replace("$__TEXT_BLURB__$", "")
 
-    # format the message template to include the tags
-    message = MESSAGE_TEMPLATE.replace("$__TAGS__$", (', ').join(image_tags))
+        # build emoji message
+        emoji_char = "" #title_stripper(submission.title)
 
-    # TODO: build out OCR handler
-    text_in_image = ""
-    if(does_image_have_text(image_url)):
-        message = message.replace("$__TEXT_BLURB__$", "\n\nDetected text in meme: \n\n    $__TEXT__$.")
-        text_in_image = get_text_in_image(image_url)
-        message = message.replace("$__TEXT__$", text_in_image)
-    else:
-        message = message.replace("$__TEXT_BLURB__$", "")
+        if emoji_char == "" or emoji_char == "_" or emoji_char == " ":
+            message = message.replace("$__EMOJI__$", "")
+        else:
+            message = message.replace("$__EMOJI__$", "\n\nTitle Emoji: " + emoji_char)
 
-    # build emoji message
-    emoji_char = title_stripper(submission.title)
+        print message
 
-    if emoji_char == "" or emoji_char == "_" or emoji_char == " ":
-        message = message.replace("$__EMOJI__$", "")
-    else:
-        message = message.replace("$__EMOJI__$", "\n\nTitle Emoji: " + emoji_char)
+        print "URL: " + image_url + "\nsubmission.id: " + submission.id
 
-    print message
+        # sends info to be stored in the database
+        put_in_db(image_url, image_tags, text_in_image, submission.title, submission.id)
 
-    # sends info to be stored in the database
-    put_in_db(image_url, image_tags, text_in_image, submission.title)
+        # sends comment to reddit to be posted
+        make_comment(message, submission)
 
-    # sends comment to reddit to be posted
-    make_comment(message, submission)
+    time.sleep(60)
 
