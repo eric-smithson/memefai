@@ -12,13 +12,14 @@ def check_if_url_in_db(url):
 
 log_dir = os.getcwd() + '/data/logs'
 
-def put_in_db(url, tags, text):
+def put_in_db(url, tags, text, title):
     url_dict = {}
     with open(log_dir + "/database.json", "r") as log_fp:
         url_dict = json.load(log_fp)
     log_fp.close()
 
     temp_dict = {}
+    temp_dict["title"] = title
     temp_dict["tags"] = tags
     temp_dict["text"] = text
     url_dict[url] = temp_dict
